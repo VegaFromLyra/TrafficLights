@@ -16,36 +16,25 @@ namespace TrafficLights
 
     public class TrafficLight
     {
-        private TRAFFIC_LIGHT_COLOR state;
-        public TRAFFIC_LIGHT_COLOR State 
-        {
-            get
-            {
-                return state;
-            }
+        public TRAFFIC_LIGHT_COLOR State { get; set; }
 
-            set
-            {  
-                state = value;
-                PrintState(state);
-            }
-        }
+        private int ID;
 
         private void PrintState(TRAFFIC_LIGHT_COLOR state)
         {
             if (!TrafficLights.ContainsKey(state))
             {
-                throw new Exception("Invalid traffic color");
+                Console.WriteLine("Invalid traffic color");
             }
 
             Console.WriteLine(TrafficLights[state]);
         }
 
-
         private Dictionary<TRAFFIC_LIGHT_COLOR, string> TrafficLights = new Dictionary<TRAFFIC_LIGHT_COLOR, string>();
 
-        public TrafficLight()
+        public TrafficLight(int id)
         {
+            ID = id;
             TrafficLights.Add(TRAFFIC_LIGHT_COLOR.RED, "Red");
             TrafficLights.Add(TRAFFIC_LIGHT_COLOR.GREEN, "Green");
             TrafficLights.Add(TRAFFIC_LIGHT_COLOR.ORANGE, "Orange");
@@ -53,7 +42,8 @@ namespace TrafficLights
 
         public void UpdateTrafficLight(object Sender, EventArgs e)
         {
-            State = (TRAFFIC_LIGHT_COLOR)((int)(state + 1) % TrafficLights.Count);
+            State =  (TRAFFIC_LIGHT_COLOR)(((int)(State + 1)) % TrafficLights.Count);
+            PrintState(State);
         }
 
     }

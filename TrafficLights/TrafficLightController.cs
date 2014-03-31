@@ -7,32 +7,35 @@ using System.Timers;
 
 namespace TrafficLights
 {
+    // Traffic light controller for 2 way traffic signal
     public class TrafficLightController
     {
         private static TrafficLightController instance;
-        private System.Timers.Timer TrafficLightTimer;
+        private Timer TrafficLightTimer;
         private static DateTime lastRecordedTime;
 
         private enum TRAFFIC_CONTROLLER_STATE
         {
-            Initial,
-            MajorTimeInterval1Elapsed,
-            MajorTimeInterval2Elapsed,
-            MinorTimeIntervalElapsed
+            Red,
+            Green,
+            Yellow
         };
 
-        private TrafficLightController(List<TrafficLight> trafficLights, int majorTimeInterval1, int majorTimeInterval2, int minorTimeInterval)
+        private TrafficLightController(List<TrafficLight> trafficLights,
+                                       int redTimeInterval,
+                                       int greenTimeInterval,
+                                       int yellowTimeInterval)
         {
             TrafficLights = trafficLights;
 
-            if (majorTimeInterval1 == 0 || majorTimeInterval2 == 0 || minorTimeInterval == 0)
+            if (redTimeInterval == 0 || greenTimeInterval == 0 || yellowTimeInterval == 0)
             {
                 throw new Exception("All time intervals should be greater than 0");
             }
 
-            this.majorTimeInterval1 = majorTimeInterval1;
-            this.majorTimeInterval2 = majorTimeInterval2;
-            this.minorTimeInterval = minorTimeInterval;
+            RTimeUnit = redTimeInterval;
+            GTimeUnit = greenTimeInterval;
+            YTimeUnit = yellowTimeInterval;
 
             if (trafficLights.Count % 2 != 0)
             {
@@ -42,13 +45,15 @@ namespace TrafficLights
             for (int i = 0; i < trafficLights.Count; i++)
             {
                 trafficLights[i].State = TRAFFIC_LIGHT_COLOR.RED;
+                // Print initial state
+                Console.WriteLine("Red");
             }
 
             lastRecordedTime = DateTime.Now;
-            currentState = TRAFFIC_CONTROLLER_STATE.Initial;
+            currentState = TRAFFIC_CONTROLLER_STATE.Red;
 
             // Create a timer with a 1 second interval.
-            TrafficLightTimer = new System.Timers.Timer(1000);
+            TrafficLightTimer = new Timer(1000);
 
             // Hook up the Elapsed event for the timer.
             TrafficLightTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
@@ -57,11 +62,14 @@ namespace TrafficLights
         }
 
 
-        public static TrafficLightController GetInstance(List<TrafficLight> trafficLights, int majorTimeInterval1, int majorTimeInterval2, int minorTimeInterval)
+        public static TrafficLightController GetInstance(List<TrafficLight> trafficLights,
+                                                         int redTimeInterval,
+                                                         int greenTimeInterval,
+                                                         int yellowTimeInterval)
         {           
             if (instance == null)
             {
-                instance = new TrafficLightController(trafficLights, majorTimeInterval1, majorTimeInterval2, minorTimeInterval);
+                instance = new TrafficLightController(trafficLights, redTimeInterval, greenTimeInterval, yellowTimeInterval);
             }
 
             return instance;
@@ -70,26 +78,27 @@ namespace TrafficLights
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             if (
-                 ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == majorTimeInterval1) && 
-                 (currentState == TRAFFIC_CONTROLLER_STATE.Initial || currentState == TRAFFIC_CONTROLLER_STATE.MinorTimeIntervalElapsed)
+                 ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == RTimeUnit) && 
+                 (currentState == TRAFFIC_CONTROLLER_STATE.Red)
                )
             {
-                UpdateState(TRAFFIC_CONTROLLER_STATE.MajorTimeInterval1Elapsed);
+                UpdateState(TRAFFIC_CONTROLLER_STATE.Green);
             }
             else if 
                 (
-                 ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == majorTimeInterval2) &&
-                 (currentState == TRAFFIC_CONTROLLER_STATE.MajorTimeInterval1Elapsed)                  
+                 ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == GTimeUnit) &&
+                 (currentState == TRAFFIC_CONTROLLER_STATE.Green)
                 )
             {
-                UpdateState(TRAFFIC_CONTROLLER_STATE.MajorTimeInterval2Elapsed);
+                UpdateState(TRAFFIC_CONTROLLER_STATE.Yellow);
             }
             else if
                 (
-                  ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == minorTimeInterval) && (currentState == TRAFFIC_CONTROLLER_STATE.MajorTimeInterval2Elapsed)
+                  ((int)(e.SignalTime - lastRecordedTime).TotalSeconds == YTimeUnit) && 
+                  (currentState == TRAFFIC_CONTROLLER_STATE.Yellow)
                 )
             {
-                UpdateState(TRAFFIC_CONTROLLER_STATE.MinorTimeIntervalElapsed);
+                UpdateState(TRAFFIC_CONTROLLER_STATE.Red);
             }
             else
             {
@@ -129,9 +138,9 @@ namespace TrafficLights
             private set;
         }
 
-        private int majorTimeInterval1;
-        private int majorTimeInterval2;
-        private int minorTimeInterval;
+        private int YTimeUnit;
+        private int GTimeUnit;
+        private int RTimeUnit;
 
         private TRAFFIC_CONTROLLER_STATE currentState;
     }

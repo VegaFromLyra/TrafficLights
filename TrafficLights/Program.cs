@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// Model traffic lights for an intersection. Write a function to operate it. 
 namespace TrafficLights
 {
     class Program
@@ -12,8 +13,8 @@ namespace TrafficLights
         {
             Console.WriteLine("Press the Enter key to exit the program.");
 
-            TrafficLight light1 = new TrafficLight();
-            TrafficLight light2 = new TrafficLight();
+            TrafficLight light1 = new TrafficLight(1);
+            TrafficLight light2 = new TrafficLight(2);
 
             List<TrafficLight> trafficLights = new List<TrafficLight>();
 
@@ -21,8 +22,9 @@ namespace TrafficLights
             trafficLights.Add(light2);
 
             // in seconds
+            // Typicall RedTimeUnits = GreenTimeUnits + OrangeTimeUnits
             int redLightTime = 5;
-            int greenLightTime = 5;
+            int greenLightTime = 3;
             int orangeLightTime = 2;
 
             TrafficLightController instance = TrafficLightController.GetInstance(trafficLights, redLightTime, greenLightTime, orangeLightTime);
